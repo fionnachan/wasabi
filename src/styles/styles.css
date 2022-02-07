@@ -1,0 +1,190 @@
+@import "highlight.css";
+
+:root {
+  --color-bg: #fffbc5;
+  --color-text-main: #333333;
+  --color-primary-light: #d0f7f0;
+  --color-primary: #afece0;
+  --blue-lighter: #88eeff;
+  --blue-light: #50d7ff;
+  --blue: #2800ff;
+  --green: #0d9239;
+  --grey-darkest: #333333;
+  --grey-darker: #666666;
+  --grey-dark: #888888;
+  --grey: #aaaaaa;
+  --grey-light: #cccccc;
+  --grey-lighter: #dddddd;
+  --grey-lightest: #efefef;
+  --pastel-gradient: linear-gradient(
+    319deg,
+    #8bd2f6 0%,
+    #f3e0c3 63%,
+    #f7baba 100%
+  );
+  --wrapper-height: 85vh;
+  --image-max-width: 320px;
+  --font-family: "HK Grotesk";
+  --font-family-header: "HK Grotesk";
+  --font-size-l: 1.4rem;
+  --font-size-m: 1rem;
+  --font-size-s: 0.85rem;
+  --font-size-xs: 0.725rem;
+  --space-xxxl: 3rem;
+  --space-xxl: 1.5rem;
+  --space-xl: 1.125rem;
+  --space-l: 0.925rem;
+  --space-m: 0.75rem;
+  --space-s: 0.5rem;
+  --space-xs: 0.325rem;
+  --space-xxs: 0.25rem;
+}
+
+::selection {
+  background: #ddd4ff; /* WebKit/Blink Browsers */
+}
+::-moz-selection {
+  background: #ddd4ff; /* Gecko Browsers */
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: var(--grey-lightest);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(319deg, #8bd2f6 0%, #f3bc55 63%, #f7baba 100%);
+  background-size: 4rem;
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background-position: 100%;
+}
+
+/* Basic page style resets */
+* {
+  box-sizing: border-box;
+}
+[hidden] {
+  display: none !important;
+}
+
+code {
+  font-size: 12px;
+  font-family: monospace;
+  padding: 2px 4px;
+  background-color: #cdcdcd;
+  border-radius: 6px;
+}
+
+/* Import fonts */
+@font-face {
+  font-family: HK Grotesk;
+  src: url("https://cdn.glitch.me/605e2a51-d45f-4d87-a285-9410ad350515%2FHKGrotesk-Regular.otf?v=1603136326027")
+    format("opentype");
+}
+@font-face {
+  font-family: HK Grotesk;
+  font-weight: bold;
+  src: url("https://cdn.glitch.me/605e2a51-d45f-4d87-a285-9410ad350515%2FHKGrotesk-Bold.otf?v=1603136323437")
+    format("opentype");
+}
+
+.divider {
+  padding: 0 1rem;
+}
+/******************************************************************************
+END Glitch hello-app default styles
+******************************************************************************/
+
+/* Page structure */
+body {
+  font-family: HK Grotesk;
+  background-color: var(--color-bg);
+}
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: var(--wrapper-height);
+  margin: 4rem 1rem 7rem;
+  min-height: 86vh;
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-xxxl);
+  max-width: 800px;
+  width: 100%;
+}
+
+/* Page titles */
+h1 {
+  color: var(--green);
+  font-family: HK Grotesk;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 60px;
+  line-height: 105%;
+}
+.page h1 {
+  font-size: 48px;
+}
+
+.page p {
+  line-height: 1.5;
+}
+
+.page a {
+  color: #000;
+}
+
+.page a:hover {
+  text-decoration: none;
+}
+
+h2 {
+  color: var(--green);
+  line-height: 1.2;
+  margin: var(--space-m) 0;
+}
+
+h1,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+}
+
+select,
+input,
+button {
+  font-family: var(--font-family);
+}
+
+button {
+  cursor: pointer;
+}
+
+input,
+select {
+  width: 100%;
+  padding: var(--space-s) var(--space-m);
+  margin: 0;
+  border: 1px solid var(--grey);
+  border-radius: 4px;
+}
+
+.valign-top {
+  align-self: flex-start;
+}

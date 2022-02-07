@@ -1,0 +1,141 @@
+{
+	"name": "ERC20 Demo",
+	"desc": "An ARC4 compliant ERC20 token on Algorand.",
+	"methods": [
+		{
+			"name": "deploy",
+			"desc": "Deploy the smart contract. During deployment the full total supply will be given to the deployer.",
+			"args": [
+				{
+					"type": "string",
+					"name": "name",
+					"desc": "Name of the token."
+				},
+				{
+					"type": "string",
+					"name": "symbol",
+					"desc": "Symbol of the token."
+				},
+				{
+					"type": "uint64",
+					"name": "totalSupply",
+					"desc": "Total token supply."
+				},
+				{
+					"type": "uint64",
+					"name": "decimals",
+					"desc": "Number of decimals the token uses - e.g. 8, means to divide the token amount by 100000000 to get its user representation."
+				}],
+			"returns": { "type": "bool", "desc": "Returns true if successful." }
+		},
+		{
+			"name": "name",
+			"desc": "Returns the name of the token - e.g. \"TestToken\".",
+			"args": [],
+			"returns": { "type": "string", "desc": "The name of the token." }
+		},
+		{
+			"name": "symbol",
+			"desc": "Returns the symbol of the token. E.g. \"TT\".",
+			"args": [],
+			"returns": { "type": "string", "desc": "The symbol of the token." }
+		},
+		{
+			"name": "decimals",
+			"desc": "Returns the number of decimals the token uses - e.g. 8, means to divide the token amount by 100000000 to get its user representation.",
+			"args": [],
+			"returns": { "type": "uint64", "desc": "The number of decimals the token used." }
+		},
+		{
+			"name": "totalSupply",
+			"desc": "Returns the total token supply.",
+			"args": [],
+			"returns": { "type": "uint64", "desc": "The total supply of the token." }
+		},
+		{
+			"name": "balanceOf",
+			"desc": "Returns the account balance of another account with account _owner.",
+			"args": [
+				{
+					"type": "account",
+					"name": "_owner",
+					"desc": "Address of account you want the balance for."
+				}
+			],
+			"returns": { "type": "uint64", "desc": "Balance of account." }
+		},
+		{
+			"name": "transfer",
+			"desc": "Transfers _value amount of tokens to account _to.",
+			"args": [
+				{
+					"type": "account",
+					"name": "_to",
+					"desc": "Address to send tokens to."
+				},
+				{
+					"type": "uint64",
+					"name": "_value",
+					"desc": "Amount of tokens to send."
+				}
+			],
+			"returns": { "type": "bool", "desc": "Returns true if successful." }
+		},
+		{
+			"name": "transferFrom",
+			"desc": "Transfers _value amount of tokens from account _from to account _to using the allowance mechanism.",
+			"args": [
+				{
+					"type": "account",
+					"name": "_from",
+					"desc": "Address to send tokens from."
+				},
+				{
+					"type": "account",
+					"name": "_to",
+					"desc": "Address to send tokens to."
+				},
+				{
+					"type": "uint64",
+					"name": "_value",
+					"desc": "Amount of tokens to send."
+				}
+			],
+			"returns": { "type": "bool", "desc": "Returns true if successful." }
+		},
+		{
+			"name": "approve",
+			"desc": "Allows _spender to withdraw from your account multiple times, up to the _value amount. If this function is called again it overwrites the current allowance with _value.",
+			"args": [
+				{
+					"type": "account",
+					"name": "_spender",
+					"desc": "Address of account you want to allow access to your funds."
+				},
+				{
+					"type": "uint64",
+					"name": "_value",
+					"desc": "Allowance to give spender."
+				}
+			],
+			"returns": { "type": "bool", "desc": "Returns true if successful." }
+		},
+		{
+			"name": "allowance",
+			"desc": "Returns the amount which _spender is still allowed to withdraw from _owner.",
+			"args": [
+				{
+					"type": "account",
+					"name": "_owner",
+					"desc": "Address of account to check."
+				},
+				{
+					"type": "account",
+					"name": "_spender",
+					"desc": "Address of spender which we're finding the limit for."
+				}
+			],
+			"returns": { "type": "uint64", "desc": "Allowance of spender for owner." }
+		}
+	]
+}
