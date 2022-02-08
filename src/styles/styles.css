@@ -8,6 +8,7 @@
   --blue-lighter: #88eeff;
   --blue-light: #50d7ff;
   --blue: #2800ff;
+  --green-darkest: #022e11;
   --green: #0d9239;
   --grey-darkest: #333333;
   --grey-darker: #666666;
@@ -50,6 +51,7 @@
 /* width */
 ::-webkit-scrollbar {
   width: 10px;
+  height: 10px;
 }
 
 /* Track */
@@ -62,6 +64,10 @@
   background: linear-gradient(319deg, #8bd2f6 0%, #f3bc55 63%, #f7baba 100%);
   background-size: 4rem;
   border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:horizontal {
+  background-size: 50rem;
 }
 
 /* Handle on hover */

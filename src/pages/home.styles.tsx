@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export const Section = styled.div`
   width: 100%;
@@ -154,30 +154,50 @@ export const InterfaceInputWrapper = styled.div`
   min-height: 25rem;
   height: auto;
   background: white;
+  border: 1px solid var(--grey-lighter);
   border-radius: 6px;
   margin-bottom: var(--space-l);
-  overflow: auto;
 `;
 
-export const InterfaceInputContent = styled.code`
+const InterfaceInputBoxSharedStyles = css`
   position: absolute;
   width: 100%;
   height: 100%;
+  line-height: 1.2;
+  font-size: var(--font-size-s);
+  font-family: monospace;
+  padding: var(--space-m);
+  border: none;
+  border-radius: 6px;
+  margin: 0;
+  overflow: auto;
+  tab-size: 2;
+`;
+
+export const InterfaceInputContentWrapper = styled.pre`
+  ${InterfaceInputBoxSharedStyles}
+`;
+
+export const InterfaceInputContent = styled.code`
+  display: block;
+  font-size: var(--font-size-s);
+  background-color: white;
+  padding: 0;
   z-index: 0;
 `;
 
 export const InterfaceInput = styled.textarea`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  padding: var(--space-m);
-  border: 1px solid var(--grey-lighter);
-  border-radius: 6px;
-  opacity: 0.3;
+  ${InterfaceInputBoxSharedStyles}
+  color: transparent;
+  background: transparent;
+  caret-color: var(--green);
   resize: none;
   z-index: 1;
+  white-space: nowrap;
+
+  ::selection {
+    color: var(--color-text-main);
+  }
 `;
 
 export const Button = styled.button`

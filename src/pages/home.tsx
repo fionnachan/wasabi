@@ -1,6 +1,12 @@
 import algosdk, { ABIContractParams, Account } from "algosdk";
-import hljs from "highlight.js";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import hljs from "highlight.js/lib/common";
+import React, {
+  KeyboardEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import MethodUI from "../components/methodUI";
 import {
@@ -25,6 +31,7 @@ import {
   Wallet,
 } from "../features/applicationSlice";
 import { useDeleteApp, useOptIntoApp, useOptOutApp } from "../hooks/account";
+import { useDebounce } from "../hooks/utils";
 import { CreatedApp } from "../types/AccountResponse";
 import { getMethodByName } from "../utils/ABIutils";
 import { isJsonString } from "../utils/stringUtils";
@@ -45,6 +52,7 @@ import {
   SubmitButton,
   InterfaceInputWrapper,
   InterfaceInputContent,
+  InterfaceInputContentWrapper,
 } from "./home.styles";
 
 const Home = () => {
@@ -55,6 +63,9 @@ const Home = () => {
   const kmdServerRef = useRef<HTMLInputElement>(null);
   const kmdPortRef = useRef<HTMLInputElement>(null);
   const walletIndexRef = useRef<HTMLSelectElement>(null);
+  const interfaceInputContentWrapperRef = useRef<HTMLPreElement>(null);
+  const interfaceInputContentRef = useRef<HTMLElement>(null);
+  const interfaceInputRef = useRef<HTMLTextAreaElement>(null);
   const wallets = useSelector(selectWallets);
   const wallet = useSelector(selectWallet);
   const kmd = useSelector(selectKmd);
@@ -78,6 +89,85 @@ const Home = () => {
   const optOutApp = useOptOutApp(setOptingOut);
   const deleteApp = useDeleteApp(setDeletingApp);
 
+  const tabHandler = useCallback(
+    (event: KeyboardEvent<HTMLTextAreaElement>) => {
+      if (!(interfaceInputRef && interfaceInputRef.current)) {
+        return;
+      }
+      const _el = interfaceInputRef.current;
+      let code = _el.value;
+      if (event.key.toLowerCase() === "tab") {
+        event.preventDefault();
+        const beforeTab = code.slice(0, _el.selectionStart);
+        const afterTab = code.slice(_el.selectionEnd, _el.value.length);
+        const cursorPos = _el.selectionEnd + 1;
+        _el.value = beforeTab + "\t" + afterTab;
+        _el.selectionStart = cursorPos;
+        _el.selectionEnd = cursorPos;
+        syncInputValue(_el.value);
+      }
+    },
+    [interfaceInputRef]
+  );
+
+  const syncInputValue = useCallback(
+    (_processedInputValue: string) => {
+      if (interfaceInputContentRef && interfaceInputContentRef.current) {
+        interfaceInputContentRef.current.innerHTML =
+          hljs.highlightAuto(_processedInputValue).value;
+      }
+    },
+    [interfaceInputContentRef]
+  );
+
+  const setScrollPosition = useCallback(() => {
+    if (
+      interfaceInputContentRef &&
+      interfaceInputContentRef.current &&
+      interfaceInputRef &&
+      interfaceInputRef.current
+    ) {
+      const _inputValue = interfaceInputRef.current.value;
+      const _processedInputValue =
+        _inputValue[_inputValue.length - 1] === "\n"
+          ? _inputValue + " "
+          : _inputValue;
+      syncInputValue(_processedInputValue);
+    }
+    if (
+      interfaceInputContentWrapperRef &&
+      interfaceInputContentWrapperRef.current &&
+      interfaceInputRef &&
+      interfaceInputRef.current
+    ) {
+      interfaceInputContentWrapperRef.current.scrollTop =
+        interfaceInputRef.current.scrollTop;
+      interfaceInputContentWrapperRef.current.scrollLeft =
+        interfaceInputRef.current.scrollLeft;
+    }
+  }, [
+    interfaceInputContentWrapperRef,
+    interfaceInputContentRef,
+    interfaceInputRef,
+    syncInputValue,
+  ]);
+
+  const interfaceInputChangeHandler = useCallback(() => {
+    if (interfaceInputRef && interfaceInputRef.current) {
+      setContractInterface(interfaceInputRef.current.value);
+    }
+    setScrollPosition();
+  }, [setScrollPosition, setContractInterface, interfaceInputRef]);
+
+  const debouncedInterfaceInputChangeHandler = useDebounce(
+    interfaceInputChangeHandler,
+    10
+  );
+  const debouncedInterfaceInputScrollHandler = useDebounce(
+    setScrollPosition,
+    10
+  );
+
   const appIdButtonClickHandler = (_appId: number) => {
     dispatch(setAppId(_appId));
     setSelfDefinedAppId(_appId);
@@ -96,13 +186,15 @@ const Home = () => {
     if (contractInterface) {
       // Parse the json file into an object, pass it to create an ABIContract object
       if (isJsonString(contractInterface)) {
-        const _interface = JSON.parse(
-          contractInterface
-        ) as unknown as ABIContractParams;
+        const _interface = JSON.parse(contractInterface) as ABIContractParams;
         console.log("_interface? ", _interface);
-        const _contract = new algosdk.ABIContract(_interface);
-        console.log("_contract? ", _contract);
-        // dispatch(setContract(_contract));
+        try {
+          const _contract = new algosdk.ABIContract(_interface);
+          console.log("_contract? ", _contract);
+          // dispatch(setContract(_contract));
+        } catch (error) {
+          console.log("input is not a valid ABIContract");
+        }
       }
     }
   }, [contractInterface]);
@@ -366,18 +458,22 @@ const Home = () => {
         <h2>Contract Interface</h2>
         <InterfaceInputWrapper>
           <InterfaceInput
-            onChange={(event) => {
-              setContractInterface(event.currentTarget.value);
-            }}
+            placeholder="Add and submit your ARC-4 contract interface...."
+            onKeyDown={(event) => tabHandler(event)}
+            onChange={debouncedInterfaceInputChangeHandler}
+            onScroll={debouncedInterfaceInputScrollHandler}
+            ref={interfaceInputRef}
+            spellCheck={false}
           />
-          <pre aria-hidden={true}>
+          <InterfaceInputContentWrapper
+            aria-hidden={true}
+            ref={interfaceInputContentWrapperRef}
+          >
             <InterfaceInputContent
               className="language-json"
-              dangerouslySetInnerHTML={{
-                __html: hljs.highlightAuto(contractInterface || "").value,
-              }}
+              ref={interfaceInputContentRef}
             ></InterfaceInputContent>
-          </pre>
+          </InterfaceInputContentWrapper>
         </InterfaceInputWrapper>
         <SubmitButton>Submit</SubmitButton>
       </Section>
