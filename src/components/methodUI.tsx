@@ -1,9 +1,4 @@
-import algosdk, {
-  ABIMethodParams,
-  ABIMethod,
-  ABIResult,
-  OnApplicationComplete,
-} from "algosdk";
+import algosdk, { ABIMethod, ABIResult, OnApplicationComplete } from "algosdk";
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -32,13 +27,7 @@ import {
   ReturnHeader,
 } from "./methodUI.styles";
 
-const MethodUI = ({
-  method,
-  contractMethod,
-}: {
-  method: ABIMethod;
-  contractMethod: ABIMethod;
-}) => {
+const MethodUI = ({ method }: { method: ABIMethod }) => {
   const refs = useRef<React.MutableRefObject<HTMLInputElement>[]>([]);
   const acctInUse = useSelector(selectAcctInUse);
   const algodClient = useSelector(selectAlgod);
@@ -47,6 +36,15 @@ const MethodUI = ({
   const [loading, setLoading] = useState(false);
   const [numOfArgs, setNumOfArgs] = useState(0);
   const [queryResult, setQueryResult] = useState<ABIResult>();
+  const [approvalProgramInput, setApprovalProgramInput] = useState<string>();
+  const [clearProgramInput, setClearProgramInput] = useState<string>();
+  const [numGByteSlicesInput, setNumGByteSlicesInput] = useState<string>();
+  const [numGIntsInput, setNumGIntsInput] = useState<string>();
+  const [numLByteSlicesInput, setNumLByteSlicesInput] = useState<string>();
+  const [numLIntsInput, setNumLIntsInput] = useState<string>();
+  const [onCompleteInput, setOnCompleteInput] = useState<OnApplicationComplete>(
+    OnApplicationComplete.OptInOC
+  );
   const isDeploy = method.name === "deploy";
   const dispatch = useDispatch();
 
@@ -98,36 +96,48 @@ const MethodUI = ({
       signer: algosdk.makeBasicAccountTransactionSigner(acctInUse),
     };
 
-    const methodArgs = refs.current.map((ref) =>
-      parseInputValue(
-        ref.current.value,
-        ref.current.getAttribute("data-arg-type")!
+    const methodArgs = refs.current
+      .map((ref) =>
+        parseInputValue(
+          ref.current.value,
+          ref.current.getAttribute("data-arg-type")!
+        )
       )
-    );
+      .filter((value) => value !== undefined && value !== "" && value !== null);
 
     let finalMethod = {
-      method: contractMethod,
+      method,
       methodArgs,
       ...commonParams,
     };
 
-    // if (isDeploy) {
-    // const approval = new Uint8Array(
-    //   Buffer.from(contractBinaries.approval, "base64")
-    // );
-    // const clear = new Uint8Array(
-    //   Buffer.from(contractBinaries.clear, "base64")
-    // );
-    //   finalMethod = Object.assign(finalMethod, {
-    //     approvalProgram: approval,
-    //     clearProgram: clear,
-    //     numGlobalByteSlices: 2,
-    //     numGlobalInts: 2,
-    //     numLocalByteSlices: 0,
-    //     numLocalInts: 16,
-    //     onComplete: OnApplicationComplete.OptInOC,
-    //   });
-    // }
+    if (isDeploy) {
+      if (
+        !approvalProgramInput ||
+        !clearProgramInput ||
+        !numGByteSlicesInput ||
+        !numGIntsInput ||
+        !numLByteSlicesInput ||
+        !numLIntsInput ||
+        !onCompleteInput
+      ) {
+        setLoading(false);
+        return;
+      }
+      const approval = new Uint8Array(
+        Buffer.from(approvalProgramInput, "base64")
+      );
+      const clear = new Uint8Array(Buffer.from(clearProgramInput, "base64"));
+      finalMethod = Object.assign(finalMethod, {
+        approvalProgram: approval,
+        clearProgram: clear,
+        numGlobalByteSlices: Number(numGByteSlicesInput),
+        numGlobalInts: Number(numGIntsInput),
+        numLocalByteSlices: Number(numLByteSlicesInput),
+        numLocalInts: Number(numLIntsInput),
+        onComplete: onCompleteInput,
+      });
+    }
 
     // Simple call to the `add` method, method_args can be any type but _must_
     // match those in the method signature of the contract
@@ -147,14 +157,87 @@ const MethodUI = ({
       setLoading(false);
       console.error("Query failed with error: ", error);
     }
-  }, [acctInUse, appID, algodClient]);
+  }, [
+    acctInUse,
+    appID,
+    algodClient,
+    approvalProgramInput,
+    clearProgramInput,
+    numGByteSlicesInput,
+    numGIntsInput,
+    numLByteSlicesInput,
+    numLIntsInput,
+    onCompleteInput,
+  ]);
 
   return (
     <MethodWrapper>
       {isDeploy && (
         <Banner>
-          You can deploy the demo app using <code>deploy.sh</code> or{" "}
-          <code>demo.sh</code>, or by using this UI.
+          <p>
+            To deploy the app, you will have to provide some additional
+            information.
+          </p>
+          <input
+            placeholder="approvalProgram (base64)"
+            value={approvalProgramInput}
+            onChange={(event) =>
+              setApprovalProgramInput(event.currentTarget.value)
+            }
+          />
+          <input
+            placeholder="clearProgram (base64)"
+            value={clearProgramInput}
+            onChange={(event) =>
+              setClearProgramInput(event.currentTarget.value)
+            }
+          />
+          <input
+            type="number"
+            placeholder="numGlobalByteSlices (uint64)"
+            value={numGByteSlicesInput}
+            onChange={(event) =>
+              setNumGByteSlicesInput(event.currentTarget.value)
+            }
+          />
+          <input
+            type="number"
+            placeholder="numGlobalInts (uint64)"
+            value={numGIntsInput}
+            onChange={(event) => setNumGIntsInput(event.currentTarget.value)}
+          />
+          <input
+            type="number"
+            placeholder="numLocalByteSlices (uint64)"
+            value={numLByteSlicesInput}
+            onChange={(event) =>
+              setNumLByteSlicesInput(event.currentTarget.value)
+            }
+          />
+          <input
+            type="number"
+            placeholder="numLocalInts (uint64)"
+            value={numLIntsInput}
+            onChange={(event) => setNumLIntsInput(event.currentTarget.value)}
+          />
+          <h5>OnComplete</h5>
+          <select
+            value={onCompleteInput}
+            onChange={(event) =>
+              setOnCompleteInput(
+                event.target.value as unknown as OnApplicationComplete
+              )
+            }
+          >
+            {Object.keys(OnApplicationComplete)
+              .filter((oc: string) => isNaN(Number(oc)))
+              .map((oc) => (
+                // @ts-ignore
+                <option key={oc} value={OnApplicationComplete[oc]}>
+                  {oc}
+                </option>
+              ))}
+          </select>
         </Banner>
       )}
       <h3>{method.name}</h3>
@@ -167,7 +250,7 @@ const MethodUI = ({
         return (
           <Arg key={arg.name}>
             <h4>
-              {arg.name} ({arg.type})
+              {arg.name} ({arg.type.toString()})
             </h4>
             <Desc>{arg.description}</Desc>
             <input
@@ -175,14 +258,19 @@ const MethodUI = ({
               data-arg-type={arg.type}
               ref={refs.current[index]}
               disabled={isDeploy && appID !== 0}
-            ></input>
+            />
           </Arg>
         );
       })}
       <Footer>
         <Button
           onClick={performQuery}
-          disabled={!acctInUse || loading || (isDeploy && appID !== 0)}
+          disabled={
+            !acctInUse ||
+            loading ||
+            (isDeploy && appID !== 0) ||
+            (!isDeploy && appID === 0)
+          }
         >
           {isDeploy
             ? loading
@@ -195,7 +283,7 @@ const MethodUI = ({
         <Return>
           <ReturnHeader>
             <span>Returns</span>
-            <code>type {method.returns.type}</code>
+            <code>type {method.returns.type.toString()}</code>
           </ReturnHeader>{" "}
           - <Desc>{method.returns.description}</Desc>
         </Return>

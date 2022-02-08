@@ -33,7 +33,6 @@ import {
 import { useDeleteApp, useOptIntoApp, useOptOutApp } from "../hooks/account";
 import { useDebounce } from "../hooks/utils";
 import { CreatedApp } from "../types/AccountResponse";
-import { getMethodByName } from "../utils/ABIutils";
 import { isJsonString } from "../utils/stringUtils";
 import {
   AccountList,
@@ -53,6 +52,7 @@ import {
   InterfaceInputWrapper,
   InterfaceInputContent,
   InterfaceInputContentWrapper,
+  InterfaceInputErrorWrapper,
 } from "./home.styles";
 
 const Home = () => {
@@ -79,6 +79,9 @@ const Home = () => {
   const [selfDefinedAppId, setSelfDefinedAppId] = useState(0);
   const [acctOptedInApps, setAcctOptedInApps] = useState<number[]>();
   const [contractInterface, setContractInterface] = useState<string>();
+  const [interfaceInputError, setInterfaceInputError] = useState<string | null>(
+    null
+  );
   const [optingIn, setOptingIn] = useState(false);
   const [optingOut, setOptingOut] = useState(false);
   const [optedIn, setOptedIn] = useState(false);
@@ -152,12 +155,33 @@ const Home = () => {
     syncInputValue,
   ]);
 
+  const submitInterfaceInput = useCallback(() => {
+    if (contractInterface) {
+      // Parse the json file into an object, pass it to create an ABIContract object
+      if (isJsonString(contractInterface)) {
+        const _interface = JSON.parse(contractInterface) as ABIContractParams;
+        try {
+          const _contract = new algosdk.ABIContract(_interface);
+          setInterfaceInputError(null);
+          dispatch(setContract(_contract));
+        } catch (error) {
+          setInterfaceInputError("Contract interface input is invalid.");
+        }
+      } else {
+        setInterfaceInputError("Contract interface input is invalid.");
+      }
+    }
+  }, [contractInterface]);
+
   const interfaceInputChangeHandler = useCallback(() => {
+    if (interfaceInputError) {
+      setInterfaceInputError(null);
+    }
     if (interfaceInputRef && interfaceInputRef.current) {
       setContractInterface(interfaceInputRef.current.value);
     }
     setScrollPosition();
-  }, [setScrollPosition, setContractInterface, interfaceInputRef]);
+  }, [setScrollPosition, interfaceInputError]);
 
   const debouncedInterfaceInputChangeHandler = useDebounce(
     interfaceInputChangeHandler,
@@ -181,23 +205,6 @@ const Home = () => {
     },
     [acctInUse]
   );
-
-  useEffect(() => {
-    if (contractInterface) {
-      // Parse the json file into an object, pass it to create an ABIContract object
-      if (isJsonString(contractInterface)) {
-        const _interface = JSON.parse(contractInterface) as ABIContractParams;
-        console.log("_interface? ", _interface);
-        try {
-          const _contract = new algosdk.ABIContract(_interface);
-          console.log("_contract? ", _contract);
-          // dispatch(setContract(_contract));
-        } catch (error) {
-          console.log("input is not a valid ABIContract");
-        }
-      }
-    }
-  }, [contractInterface]);
 
   const setAcctApps = useCallback(async () => {
     if (acctInfo) {
@@ -428,7 +435,7 @@ const Home = () => {
                 <div>
                   <input
                     type="number"
-                    value={selfDefinedAppId}
+                    defaultValue={selfDefinedAppId}
                     onChange={(event) =>
                       setSelfDefinedAppId(Number(event.target.value))
                     }
@@ -458,7 +465,7 @@ const Home = () => {
         <h2>Contract Interface</h2>
         <InterfaceInputWrapper>
           <InterfaceInput
-            placeholder="Add and submit your ARC-4 contract interface...."
+            placeholder="Add and submit your ARC-4 contract interface"
             onKeyDown={(event) => tabHandler(event)}
             onChange={debouncedInterfaceInputChangeHandler}
             onScroll={debouncedInterfaceInputScrollHandler}
@@ -475,7 +482,12 @@ const Home = () => {
             ></InterfaceInputContent>
           </InterfaceInputContentWrapper>
         </InterfaceInputWrapper>
-        <SubmitButton>Submit</SubmitButton>
+        {interfaceInputError && (
+          <InterfaceInputErrorWrapper>
+            {interfaceInputError}
+          </InterfaceInputErrorWrapper>
+        )}
+        <SubmitButton onClick={submitInterfaceInput}>Submit</SubmitButton>
       </Section>
       {contract && (
         <>
@@ -513,11 +525,7 @@ const Home = () => {
             <h2>Contract Methods</h2>
             <Methods>
               {contract.methods.map((method) => (
-                <MethodUI
-                  key={method.name}
-                  method={method}
-                  contractMethod={getMethodByName(method.name, contract)!}
-                />
+                <MethodUI key={method.name} method={method} />
               ))}
             </Methods>
           </Section>

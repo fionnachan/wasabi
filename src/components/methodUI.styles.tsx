@@ -12,9 +12,17 @@ export const MethodWrapper = styled.div`
 export const Banner = styled.div`
   font-size: var(--font-size-s);
   background: var(--pastel-gradient);
-  padding: var(--space-xs) var(--space-s);
+  padding: var(--space-m);
   border-radius: 8px;
   margin: 0 0 var(--space-s);
+
+  p {
+    margin: 0;
+  }
+
+  input {
+    margin: var(--space-xs) 0;
+  }
 `;
 
 export const Caption = styled.p`

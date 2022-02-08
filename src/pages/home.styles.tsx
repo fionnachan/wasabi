@@ -20,7 +20,7 @@ export const InfoTable = styled.div`
   background: rgba(255, 250, 200, 0.95);
   padding: var(--space-xl);
   border-top: 3px solid #ffffdd;
-  z-index: 1;
+  z-index: 2;
   p {
     margin-top: 0;
   }
@@ -198,6 +198,10 @@ export const InterfaceInput = styled.textarea`
   ::selection {
     color: var(--color-text-main);
   }
+`;
+
+export const InterfaceInputErrorWrapper = styled.p`
+  color: var(--color-error);
 `;
 
 export const Button = styled.button`
