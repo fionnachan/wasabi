@@ -31,6 +31,9 @@ const Seo = () => {
     />
 
     <meta name="twitter:card" content="summary" />
+    <link rel="icon" href="/images/favicon.png" type="image/png" sizes="16x16"/>
+    <link rel="icon" href="/images/favicon.png" type="image/png" sizes="32x32"/>
+    <link rel="icon" href="/images/favicon.png" type="image/png" sizes="96x96"/>
   </Helmet>
 };
 
